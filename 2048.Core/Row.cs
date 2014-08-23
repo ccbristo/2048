@@ -4,55 +4,63 @@ using System.Linq;
 
 namespace _2048.Core
 {
-    public sealed class Row : IEquatable<Row>
+    public sealed class Row
     {
-        public int? A { get; private set; }
-        public int? B { get; private set; }
-        public int? C { get; private set; }
-        public int? D { get; private set; }
-
         public static readonly Row Empty = new Row();
+        private readonly int?[] Values = new int?[4];
+
+        public int? A
+        {
+            get { return Values[0]; }
+        }
+
+        public int? B
+        {
+            get { return Values[1]; }
+        }
+
+        public int? C
+        {
+            get { return Values[2]; }
+        }
+
+        public int? D
+        {
+            get { return Values[3]; }
+        }
+
+        public int? this[int index]
+        {
+            get { return Values[index]; }
+        }
 
         private Row()
         { }
 
         public Row(int? a = null, int? b = null, int? c = null, int? d = null)
         {
-            A = a;
-            B = b;
-            C = c;
-            D = d;
+            Values = new[] {a, b, c, d};
         }
 
-        internal Row(List<int?> seed)
+        internal Row(IEnumerable<int?> seed)
         {
-            if (seed.Count > 0)
-                A = seed[0];
-            if (seed.Count > 1)
-                B = seed[1];
-            if (seed.Count > 2)
-                C = seed[2];
-            if (seed.Count > 3)
-                D = seed[3];
+            if(seed.Count() != 4)
+                throw new ArgumentException("Seed must be 4 items long.");
+
+            Values = seed.ToArray();
         }
 
-        public bool Equals(Row other)
+        public bool Full
+        {
+            get { return Values.All(v => v != null); }
+        }
+
+        public bool IsEquivalentTo(Row other)
         {
             return this.A == other.A &&
                    this.B == other.B &&
                    this.C == other.C &&
                    this.D == other.D;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as Row;
-            return Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            throw new NotImplementedException();
         }
 
         public Row ShiftLeft(out bool shifted)
@@ -84,6 +92,8 @@ namespace _2048.Core
             }
 
             shifted = remaining.Count != result.Count;
+            while(result.Count < 4)
+                result.Add(null);
             return new Row(result);
         }
 
@@ -95,6 +105,14 @@ namespace _2048.Core
         private Row Reverse()
         {
             return new Row(D, C, B, A);
+        }
+
+        internal Row SetCell(int cell, int value)
+        {
+            var newValues = new int?[4];
+            Array.Copy(Values, newValues, Values.Length);
+            newValues[cell] = value;
+            return new Row(newValues);
         }
     }
 }

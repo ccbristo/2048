@@ -11,7 +11,15 @@ namespace _2048.Tests
         {
             var boardA = new GameBoard(Row.Empty, Row.Empty, Row.Empty, Row.Empty);
             var boardB = new GameBoard(Row.Empty, Row.Empty, Row.Empty, Row.Empty);
-            Assert.AreEqual(boardA, boardB);
+            GameBoardAssert.AreEquivalent(boardA, boardB);
+        }
+
+        [TestMethod]
+        public void Can_Generate_The_Next_Piece()
+        {
+            var board = new GameBoard(Row.Empty, Row.Empty, Row.Empty, Row.Empty);
+            board.GenerateNewPiece();
+            board.GenerateNewPiece();
         }
     }
 }

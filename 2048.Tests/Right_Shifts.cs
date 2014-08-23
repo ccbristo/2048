@@ -18,7 +18,7 @@ namespace _2048.Tests
 
             var expected = new GameBoard(new Row(d: 4), Row.Empty, Row.Empty, Row.Empty);
 
-            Assert.AreEqual(expected, actual, "Right shift");
+            GameBoardAssert.AreEquivalent(expected, actual);
         }
 
         [TestMethod]
@@ -33,7 +33,7 @@ namespace _2048.Tests
 
             var expected = new GameBoard(new Row(c: 2, d: 4), Row.Empty, Row.Empty, Row.Empty);
 
-            Assert.AreEqual(expected, actual, "Right shift");
+            GameBoardAssert.AreEquivalent(expected, actual);
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace _2048.Tests
 
             var expected = new GameBoard(new Row(d: 4), Row.Empty, Row.Empty, Row.Empty);
 
-            Assert.AreEqual(expected, actual, "Right shift");
+            GameBoardAssert.AreEquivalent(expected, actual);
         }
 
         [TestMethod]
@@ -63,7 +63,7 @@ namespace _2048.Tests
 
             var expected = new GameBoard(new Row(c: 4, d : 4), Row.Empty, Row.Empty, Row.Empty);
 
-            Assert.AreEqual(expected, actual, "Right shift");
+            GameBoardAssert.AreEquivalent(expected, actual);
         }
     }
 }

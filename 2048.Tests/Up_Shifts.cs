@@ -4,17 +4,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace _2048.Tests
 {
     [TestClass]
-    public class Left_Shifts
+    public class Up_Shifts
     {
         [TestMethod]
-        public void Can_Shift_Left()
+        public void Combine_Siblings()
         {
-            var board = new GameBoard(new Row(a: 2, b: 2),
-                Row.Empty,
+            var board = new GameBoard(new Row(a: 2),
+                new Row(a: 2), 
                 Row.Empty,
                 Row.Empty);
 
-            var actual = board.ShiftLeft();
+            var actual = board.ShiftUp();
 
             var expected = new GameBoard(new Row(a: 4), Row.Empty, Row.Empty, Row.Empty);
 
@@ -22,16 +22,19 @@ namespace _2048.Tests
         }
 
         [TestMethod]
-        public void Fold_Left_First()
+        public void Fold_Up_First()
         {
-            var board = new GameBoard(new Row(a: 2, b: 2, c: 2),
-                Row.Empty,
-                Row.Empty,
+            var board = new GameBoard(new Row(a: 2),
+                new Row(a: 2),
+                new Row(a: 2),
                 Row.Empty);
 
-            var actual = board.ShiftLeft();
+            var actual = board.ShiftUp();
 
-            var expected = new GameBoard(new Row(a: 4, b: 2), Row.Empty, Row.Empty, Row.Empty);
+            var expected = new GameBoard(new Row(a: 4),
+                new Row(a: 2),
+                Row.Empty,
+                Row.Empty);
 
             GameBoardAssert.AreEquivalent(expected, actual);
         }
@@ -39,12 +42,12 @@ namespace _2048.Tests
         [TestMethod]
         public void Ignore_Nulls()
         {
-            var board = new GameBoard(new Row(b: 2, d: 2),
+            var board = new GameBoard(new Row(a: 2),
                 Row.Empty,
                 Row.Empty,
-                Row.Empty);
+                new Row(a: 2));
 
-            var actual = board.ShiftLeft();
+            var actual = board.ShiftUp();
 
             var expected = new GameBoard(new Row(a: 4), Row.Empty, Row.Empty, Row.Empty);
 
@@ -54,14 +57,17 @@ namespace _2048.Tests
         [TestMethod]
         public void Folds_Double_Combos()
         {
-            var board = new GameBoard(new Row(a: 2, b: 2, c: 2, d: 2),
-                Row.Empty,
-                Row.Empty,
+            var board = new GameBoard(new Row(a: 2),
+                new Row(a: 2),
+                new Row(a: 2),
+                new Row(a: 2));
+
+            var actual = board.ShiftUp();
+
+            var expected = new GameBoard(new Row(a: 4),
+                new Row(a: 4),
+                Row.Empty, 
                 Row.Empty);
-
-            var actual = board.ShiftLeft();
-
-            var expected = new GameBoard(new Row(a: 4, b : 4), Row.Empty, Row.Empty, Row.Empty);
 
             GameBoardAssert.AreEquivalent(expected, actual);
         }
