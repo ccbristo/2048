@@ -9,18 +9,23 @@ namespace _2048.Tests
         [TestMethod]
         public void Combine_Siblings()
         {
-            var board = new GameBoard(new Row(a: 2),
-                new Row(a: 2), 
-                Row.Empty,
-                Row.Empty);
+            var board = new GameBoard(new int?[,]
+            {
+                {2, null, null, null },
+                {2, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            });
 
             var actual = board.ShiftDown();
 
-            var expected = new GameBoard(
-                Row.Empty,
-                Row.Empty,
-                Row.Empty,
-                new Row(a: 4));
+            var expected = new GameBoard(new int?[,]
+            {
+                {null, null, null, null },
+                {null, null, null, null},
+                {null, null, null, null},
+                {4, null, null, null}
+            });
 
             GameBoardAssert.AreEquivalent(expected, actual);
         }
@@ -28,18 +33,23 @@ namespace _2048.Tests
         [TestMethod]
         public void Fold_Down_First()
         {
-            var board = new GameBoard(new Row(a: 2),
-                new Row(a: 2),
-                new Row(a: 2),
-                Row.Empty);
+            var board = new GameBoard(new int?[,]
+            {
+                {2, null, null, null },
+                {2, null, null, null},
+                {2, null, null, null},
+                {null, null, null, null}
+            });
 
             var actual = board.ShiftDown();
 
-            var expected = new GameBoard(
-                Row.Empty,
-                Row.Empty,
-                new Row(a: 2),
-                new Row(a: 4));
+            var expected = new GameBoard(new int?[,]
+            {
+                {null, null, null, null },
+                {null, null, null, null},
+                {2, null, null, null},
+                {4, null, null, null}
+            });
 
             GameBoardAssert.AreEquivalent(expected, actual);
         }
@@ -47,18 +57,23 @@ namespace _2048.Tests
         [TestMethod]
         public void Ignore_Nulls()
         {
-            var board = new GameBoard(new Row(a: 2),
-                Row.Empty,
-                Row.Empty,
-                new Row(a: 2));
+            var board = new GameBoard(new int?[,]
+            {
+                {2, null, null, null },
+                {null, null, null, null},
+                {null, null, null, null},
+                {2, null, null, null}
+            });
 
             var actual = board.ShiftDown();
 
-            var expected = new GameBoard(
-                Row.Empty,
-                Row.Empty,
-                Row.Empty,
-                new Row(a: 4));
+            var expected = new GameBoard(new int?[,]
+            {
+                {null, null, null, null },
+                {null, null, null, null},
+                {null, null, null, null},
+                {4, null, null, null}
+            });
 
             GameBoardAssert.AreEquivalent(expected, actual);
         }
@@ -66,18 +81,23 @@ namespace _2048.Tests
         [TestMethod]
         public void Folds_Double_Combos()
         {
-            var board = new GameBoard(new Row(a: 2),
-                new Row(a: 2),
-                new Row(a: 2),
-                new Row(a: 2));
+            var board = new GameBoard(new int?[,]
+            {
+                {2, null, null, null },
+                {2, null, null, null},
+                {2, null, null, null},
+                {2, null, null, null}
+            });
 
             var actual = board.ShiftDown();
 
-            var expected = new GameBoard(
-                Row.Empty, 
-                Row.Empty,
-                new Row(a: 4),
-                new Row(a: 4));
+            var expected = new GameBoard(new int?[,]
+            {
+                {null, null, null, null },
+                {null, null, null, null},
+                {4, null, null, null},
+                {4, null, null, null}
+            });
 
             GameBoardAssert.AreEquivalent(expected, actual);
         }

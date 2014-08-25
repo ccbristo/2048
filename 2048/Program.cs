@@ -46,15 +46,42 @@ namespace _2048
 
         private static void Print(GameBoard board)
         {
+
+            /*
+            string s = @"
+┌───────┬───────┬───────┬───────┐
+│ x2048 │ x2048 │ x2048 │ x2048 │
+├───────┼───────┼───────┼───────┤
+│ x2048 │ x2048 │ x2048 │ x2048 │
+├───────┼───────┼───────┼───────┤
+│ x2048 │ x2048 │ x2048 │ x2048 │
+├───────┼───────┼───────┼───────┤
+│ x2048 │ x2048 │ x2048 │ x2048 │
+└───────┴───────┴───────┴───────┘";
+
+            Console.WriteLine(s);
+            Console.ReadLine();
+            Environment.Exit(0);
+            */
+
+            Console.WriteLine("┌───────┬───────┬───────┬───────┐");
+            int rowNumber = 0;
+
             foreach (var row in board.AllRows)
             {
                 for (int i = 0; i < 4; i++)
-                {
-                    Console.Write(row[i].ToString().PadLeft(5, ' '));
-                }
+                    Console.Write("│ {0,5} ", row[i]);
 
-                Console.WriteLine();
+                Console.WriteLine("│");
+
+                if(rowNumber != 3)
+                    Console.WriteLine("├───────┼───────┼───────┼───────┤");
+
+                rowNumber++;
             }
+
+            Console.WriteLine("└───────┴───────┴───────┴───────┘");
+            
         }
     }
 }

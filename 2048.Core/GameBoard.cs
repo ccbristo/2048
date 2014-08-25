@@ -6,87 +6,129 @@ namespace _2048.Core
 {
     public sealed class GameBoard
     {
-        public Row Row1 { get; private set; }
-        public Row Row2 { get; private set; }
-        public Row Row3 { get; private set; }
-        public Row Row4 { get; private set; }
+        private const int Size = 4;
+        private readonly int?[,] Cells;
+        private readonly Random Random = new Random();
+
+        public GameBoard()
+            : this(new int?[Size, Size])
+        { }
+
+        public GameBoard(int?[,] cells)
+        {
+            if (cells.Rank != 2 ||
+                cells.GetUpperBound(0) != Size - 1 ||
+                cells.GetUpperBound(1) != Size - 1)
+                throw new ArgumentException(string.Format("cells must be a {0}x{0} array.", Size), "cells");
+
+            Cells = cells;
+        }
 
         public IEnumerable<Row> AllRows
         {
             get
             {
-                yield return Row1;
-                yield return Row2;
-                yield return Row3;
-                yield return Row4;
+                yield return new Row(Cells[0, 0], Cells[0, 1], Cells[0, 2], Cells[0, 3]);
+                yield return new Row(Cells[1, 0], Cells[1, 1], Cells[1, 2], Cells[1, 3]);
+                yield return new Row(Cells[2, 0], Cells[2, 1], Cells[2, 2], Cells[2, 3]);
+                yield return new Row(Cells[3, 0], Cells[3, 1], Cells[3, 2], Cells[3, 3]);
             }
-        }
-
-        private readonly Random Random = new Random();
-
-        public GameBoard()
-            : this(Row.Empty, Row.Empty, Row.Empty, Row.Empty)
-        { }
-
-        public GameBoard(Row row1, Row row2, Row row3, Row row4)
-        {
-            Row1 = row1;
-            Row2 = row2;
-            Row3 = row3;
-            Row4 = row4;
         }
 
         public GameBoard GenerateNewPiece()
         {
-            while (true)
-            {
-                int rowIndex = Random.Next(3);
-                Row row = AllRows.Skip(rowIndex).First();
-                
-                if (row.Full)
-                    continue;
+            var template = new { Row = 0, Column = 0 };
+            var openCells = Enumerable.Repeat(template, 0).ToList();
 
-                int cell = Random.Next(3);
-                if (row[cell] != null)
-                    continue;
+            for (int row = 0; row < Size; row++)
+                for (int column = 0; column < Size; column++)
+                    if (Cells[row, column] == null)
+                        openCells.Add(new { Row = row, Column = column });
 
-                int nextValue = Random.Next(5) == 5 ? 4 : 2;
-                Row newRow = row.SetCell(cell, nextValue);
-                GameBoard newBoard = this.Replace(rowIndex, newRow);
-                return newBoard;
-            }
+            int indexToReplace = Random.Next(openCells.Count);
+            var itemToReplace = openCells[indexToReplace];
+
+            int newValue = Random.Next(5) == 5 ? 4 : 2;
+            GameBoard newBoard = this.ReplaceCell(itemToReplace.Row, itemToReplace.Column, newValue);
+            return newBoard;
         }
 
-        private GameBoard Replace(int rowNumber, Row newRow)
+        private GameBoard ReplaceCell(int rowIndex, int columnIndex, int newValue)
         {
-            return new GameBoard(
-                rowNumber == 0 ? newRow : Row1,
-                rowNumber == 1 ? newRow : Row2,
-                rowNumber == 2 ? newRow : Row3,
-                rowNumber == 3 ? newRow : Row4);
+            var newCells = new int?[Size, Size];
+            Array.Copy(Cells, newCells, Cells.Length);
+            newCells[rowIndex, columnIndex] = newValue;
+            return new GameBoard(newCells);
+        }
+
+        private GameBoard ReplaceRow(int rowIndex, int?[] newRow)
+        {
+            var newCells = new int?[Size, Size];
+            Array.Copy(Cells, newCells, Cells.Length);
+            for (int column = 0; column < Size; column++)
+                newCells[rowIndex, column] = newRow[column];
+
+            return new GameBoard(newCells);
         }
 
         public GameBoard ShiftLeft()
         {
-            bool shifted;
-            return HorizontalShift(r => r.ShiftLeft(out shifted));
+            return Shift();
         }
 
         public GameBoard ShiftRight()
         {
-            bool shifted;
-            return HorizontalShift(r => r.ShiftRight(out shifted));
+            return this.ReverseRows().Shift().ReverseRows();
         }
 
-        private GameBoard HorizontalShift(Func<Row, Row> shiftFunc)
+        private GameBoard Shift()
         {
-            var rows = new[] { Row1, Row2, Row3, Row4 };
-            var newRows = rows.Select(shiftFunc).ToList();
+            GameBoard board = this;
+            int?[] newRow = null;
+            for (int rowIndex = 0; rowIndex < Size; rowIndex++)
+            {
+                newRow = Shift(rowIndex);
+                board = board.ReplaceRow(rowIndex, newRow);
+            }
 
-            return new GameBoard(newRows[0],
-                                 newRows[1],
-                                 newRows[2],
-                                 newRows[3]);
+            return board;
+        }
+
+        private int?[] Shift(int rowIndex)
+        {
+            var row = new int?[] { Cells[rowIndex, 0], Cells[rowIndex, 1], Cells[rowIndex, 2], Cells[rowIndex, 3] };
+            var nonNulls = row.Where(i => i != null).ToList();
+            var remaining = nonNulls.Skip(1).ToList();
+            int? previous = nonNulls.FirstOrDefault();
+            var result = new List<int?> { previous };
+
+            while (remaining.Count > 0)
+            {
+                int? current = remaining[0];
+                if (current == null)
+                {
+                    remaining.RemoveAt(0);
+                }
+                else if (previous == current)
+                {
+                    result[result.Count - 1] = previous * 2;
+                    previous = null;
+                    remaining.RemoveAt(0);
+                }
+                else
+                {
+                    previous = current;
+                    result.Add(previous);
+                    remaining.RemoveAt(0);
+                }
+            }
+
+            while (result.Count < 4)
+                result.Add(null);
+
+            return result.ToArray();
+
+
         }
 
         public GameBoard ShiftUp()
@@ -99,13 +141,26 @@ namespace _2048.Core
             return Transpose().ShiftRight().Transpose();
         }
 
+        private GameBoard ReverseRows()
+        {
+            var newCells = new int?[Size, Size];
+            Array.Copy(Cells, newCells, Cells.Length);
+
+            for (int row = 0; row < Size; row++)
+                for (int column = 0; column < Size; column++)
+                    newCells[row, column] = Cells[row, Size - column - 1];
+
+            return new GameBoard(newCells);
+        }
+
         private GameBoard Transpose()
         {
-            var row1 = new Row(Row1.A, Row2.A, Row3.A, Row4.A);
-            var row2 = new Row(Row1.B, Row2.B, Row3.B, Row4.B);
-            var row3 = new Row(Row1.C, Row2.C, Row3.C, Row4.C);
-            var row4 = new Row(Row1.D, Row2.D, Row3.D, Row4.D);
-            return new GameBoard(row1, row2, row3, row4);
+            var newCells = new int?[Size, Size];
+            for (int column = 0; column < Size; column++)
+                for (int row = 0; row < Size; row++)
+                    newCells[column, row] = Cells[row, column];
+
+            return new GameBoard(newCells);
         }
 
         public bool IsEquivalentTo(GameBoard other)
@@ -116,10 +171,12 @@ namespace _2048.Core
             if (ReferenceEquals(this, other))
                 return true;
 
-            return this.Row1.IsEquivalentTo(other.Row1) &&
-                   this.Row2.IsEquivalentTo(other.Row2) &&
-                   this.Row3.IsEquivalentTo(other.Row3) &&
-                   this.Row4.IsEquivalentTo(other.Row4);
+            for (int row = 0; row < Size; row++)
+                for (int column = 0; column < Size; column++)
+                    if (this.Cells[row, column] != other.Cells[row, column])
+                        return false;
+
+            return true;
         }
     }
 }

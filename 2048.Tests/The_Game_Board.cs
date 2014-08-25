@@ -9,17 +9,18 @@ namespace _2048.Tests
         [TestMethod]
         public void Can_Be_Compared_For_Equality()
         {
-            var boardA = new GameBoard(Row.Empty, Row.Empty, Row.Empty, Row.Empty);
-            var boardB = new GameBoard(Row.Empty, Row.Empty, Row.Empty, Row.Empty);
+            var boardA = new GameBoard();
+            var boardB = new GameBoard();
             GameBoardAssert.AreEquivalent(boardA, boardB);
         }
 
         [TestMethod]
         public void Can_Generate_The_Next_Piece()
         {
-            var board = new GameBoard(Row.Empty, Row.Empty, Row.Empty, Row.Empty);
-            board.GenerateNewPiece();
-            board.GenerateNewPiece();
+            var board = new GameBoard();
+
+            for(int i = 0; i < 16; i++)
+                board = board.GenerateNewPiece();
         }
     }
 }
