@@ -19,8 +19,25 @@ namespace _2048.Tests
         {
             var board = new GameBoard();
 
-            for(int i = 0; i < 16; i++)
+            for (int i = 0; i < 16; i++)
                 board = board.GenerateNewPiece();
+        }
+
+        [TestMethod]
+        public void Keeps_Score()
+        {
+            var board = new GameBoard(new int?[,]
+            {
+                {2, 2, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {4, null, null, null},
+            });
+
+            board = board.ShiftLeft();
+            board = board.ShiftUp();
+
+            Assert.AreEqual(12, board.Score);
         }
     }
 }

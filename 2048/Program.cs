@@ -7,11 +7,13 @@ namespace _2048
     {
         static void Main(string[] args)
         {
-            GameBoard board = new GameBoard();
-            board = board.GenerateNewPiece();
-            board = board.GenerateNewPiece();
+            var board = new GameBoard()
+                .GenerateNewPiece()
+                .GenerateNewPiece();
 
-            while (true)
+            bool canMove = true;
+
+            while (canMove)
             {
                 Console.Clear();
                 Print(board);
@@ -36,29 +38,44 @@ namespace _2048
 
                 if (!originalBoard.IsEquivalentTo(board))
                     board = board.GenerateNewPiece();
-
+                else
+                    canMove = CanMove(board, originalBoard);
             }
+
+            Console.WriteLine("Game Over");
+            Console.ReadLine();
+        }
+
+        private static bool CanMove(GameBoard board, GameBoard originalBoard)
+        {
+            GameBoard dummy = board.ShiftLeft();
+
+            if (!dummy.IsEquivalentTo(board))
+                return true;
+
+            dummy = board.ShiftRight();
+
+            if (!dummy.IsEquivalentTo(originalBoard))
+                return true;
+
+            dummy = board.ShiftUp();
+
+            if (!dummy.IsEquivalentTo(originalBoard))
+                return true;
+
+            dummy = board.ShiftDown();
+
+            if (!dummy.IsEquivalentTo(originalBoard))
+                return true;
+
+            return false;
         }
 
         private static void Print(GameBoard board)
         {
+            Console.WriteLine("Score: {0,7}", board.Score);
+            Console.WriteLine();
 
-            /*
-            string s = @"
-┌───────┬───────┬───────┬───────┐
-│ x2048 │ x2048 │ x2048 │ x2048 │
-├───────┼───────┼───────┼───────┤
-│ x2048 │ x2048 │ x2048 │ x2048 │
-├───────┼───────┼───────┼───────┤
-│ x2048 │ x2048 │ x2048 │ x2048 │
-├───────┼───────┼───────┼───────┤
-│ x2048 │ x2048 │ x2048 │ x2048 │
-└───────┴───────┴───────┴───────┘";
-
-            Console.WriteLine(s);
-            Console.ReadLine();
-            Environment.Exit(0);
-            */
 
             Console.WriteLine("┌───────┬───────┬───────┬───────┐");
             int rowNumber = 0;

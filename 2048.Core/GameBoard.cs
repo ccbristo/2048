@@ -11,10 +11,10 @@ namespace _2048.Core
         private readonly Random Random = new Random();
 
         public GameBoard()
-            : this(new int?[Size, Size])
+            : this(new int?[Size, Size], 0)
         { }
 
-        public GameBoard(int?[,] cells)
+        public GameBoard(int?[,] cells, int score = 0)
         {
             if (cells.Rank != 2 ||
                 cells.GetUpperBound(0) != Size - 1 ||
@@ -22,6 +22,7 @@ namespace _2048.Core
                 throw new ArgumentException(string.Format("cells must be a {0}x{0} array.", Size), "cells");
 
             Cells = cells;
+            Score = score;
         }
 
         public IEnumerable<Row> AllRows
@@ -34,6 +35,8 @@ namespace _2048.Core
                 yield return new Row(Cells[3, 0], Cells[3, 1], Cells[3, 2], Cells[3, 3]);
             }
         }
+
+        public int Score { get; private set; }
 
         public GameBoard GenerateNewPiece()
         {
@@ -58,17 +61,19 @@ namespace _2048.Core
             var newCells = new int?[Size, Size];
             Array.Copy(Cells, newCells, Cells.Length);
             newCells[rowIndex, columnIndex] = newValue;
-            return new GameBoard(newCells);
+            return new GameBoard(newCells, Score);
         }
 
-        private GameBoard ReplaceRow(int rowIndex, int?[] newRow)
+        private GameBoard ReplaceRow(int rowIndex, int?[] newRow, int rowScore)
         {
             var newCells = new int?[Size, Size];
             Array.Copy(Cells, newCells, Cells.Length);
             for (int column = 0; column < Size; column++)
                 newCells[rowIndex, column] = newRow[column];
 
-            return new GameBoard(newCells);
+            int newScore = Score + rowScore;
+
+            return new GameBoard(newCells, newScore);
         }
 
         public GameBoard ShiftLeft()
@@ -98,17 +103,21 @@ namespace _2048.Core
         private GameBoard Shift()
         {
             GameBoard board = this;
+
             for (int rowIndex = 0; rowIndex < Size; rowIndex++)
             {
-                int?[] newRow = ShiftRow(rowIndex);
-                board = board.ReplaceRow(rowIndex, newRow);
+                int rowScore;
+                int?[] newRow = ShiftRow(rowIndex, out rowScore);
+                board = board.ReplaceRow(rowIndex, newRow, rowScore);
             }
 
             return board;
         }
 
-        private int?[] ShiftRow(int rowIndex)
+        private int?[] ShiftRow(int rowIndex, out int rowScore)
         {
+            rowScore = 0;
+
             var row = new int?[] { Cells[rowIndex, 0], Cells[rowIndex, 1], Cells[rowIndex, 2], Cells[rowIndex, 3] };
             var nonNulls = row.Where(i => i != null).ToList();
             var remaining = nonNulls.Skip(1).ToList();
@@ -121,7 +130,9 @@ namespace _2048.Core
 
                 if (previous == current)
                 {
-                    result[result.Count - 1] = previous * 2;
+                    int newValue = previous.Value * 2;
+                    rowScore += newValue;
+                    result[result.Count - 1] = newValue;
                     previous = null;
                 }
                 else
@@ -148,7 +159,7 @@ namespace _2048.Core
                 for (int column = 0; column < Size; column++)
                     newCells[row, column] = Cells[row, Size - column - 1];
 
-            return new GameBoard(newCells);
+            return new GameBoard(newCells, Score);
         }
 
         private GameBoard Invert()
@@ -158,7 +169,7 @@ namespace _2048.Core
                 for (int row = 0; row < Size; row++)
                     newCells[column, row] = Cells[row, column];
 
-            return new GameBoard(newCells);
+            return new GameBoard(newCells, Score);
         }
 
         public bool IsEquivalentTo(GameBoard other)
