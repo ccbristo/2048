@@ -81,20 +81,33 @@ namespace _2048.Core
             return this.ReverseRows().Shift().ReverseRows();
         }
 
+        public GameBoard ShiftUp()
+        {
+            return Invert().Shift().Invert();
+        }
+
+        public GameBoard ShiftDown()
+        {
+            return Invert()
+                .ReverseRows()
+                .Shift()
+                .ReverseRows()
+                .Invert();
+        }
+
         private GameBoard Shift()
         {
             GameBoard board = this;
-            int?[] newRow = null;
             for (int rowIndex = 0; rowIndex < Size; rowIndex++)
             {
-                newRow = Shift(rowIndex);
+                int?[] newRow = ShiftRow(rowIndex);
                 board = board.ReplaceRow(rowIndex, newRow);
             }
 
             return board;
         }
 
-        private int?[] Shift(int rowIndex)
+        private int?[] ShiftRow(int rowIndex)
         {
             var row = new int?[] { Cells[rowIndex, 0], Cells[rowIndex, 1], Cells[rowIndex, 2], Cells[rowIndex, 3] };
             var nonNulls = row.Where(i => i != null).ToList();
@@ -105,40 +118,25 @@ namespace _2048.Core
             while (remaining.Count > 0)
             {
                 int? current = remaining[0];
-                if (current == null)
-                {
-                    remaining.RemoveAt(0);
-                }
-                else if (previous == current)
+
+                if (previous == current)
                 {
                     result[result.Count - 1] = previous * 2;
                     previous = null;
-                    remaining.RemoveAt(0);
                 }
                 else
                 {
                     previous = current;
                     result.Add(previous);
-                    remaining.RemoveAt(0);
                 }
+
+                remaining.RemoveAt(0);
             }
 
             while (result.Count < 4)
                 result.Add(null);
 
             return result.ToArray();
-
-
-        }
-
-        public GameBoard ShiftUp()
-        {
-            return Transpose().ShiftLeft().Transpose();
-        }
-
-        public GameBoard ShiftDown()
-        {
-            return Transpose().ShiftRight().Transpose();
         }
 
         private GameBoard ReverseRows()
@@ -153,7 +151,7 @@ namespace _2048.Core
             return new GameBoard(newCells);
         }
 
-        private GameBoard Transpose()
+        private GameBoard Invert()
         {
             var newCells = new int?[Size, Size];
             for (int column = 0; column < Size; column++)

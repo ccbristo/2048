@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using _2048.Core;
+﻿using _2048.Core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace _2048.Tests
 {
